@@ -74,4 +74,3 @@ Check out `Makefile` for more details or read my article on <a href="https://ixi
 - make filesystem writable after boot
 - support different image formats (e.g. VirtualBox VDI)
 - support different target architectures (e.g. ARM)
-

@@ -2,45 +2,25 @@ COL_RED="\033[0;31m"
 COL_GRN="\033[0;32m"
 COL_END="\033[0m"
 
-REPO=docker-to-linux
+REPO=docker-os
 
 .PHONY:
-debian: debian.img
+docker: docker.img
 
 .PHONY:
-ubuntu: ubuntu.img
+docker.tar:
+	@make DISTR="docker" linux.tar
 
 .PHONY:
-alpine: alpine.img
-
-.PHONY:
-debian.tar:
-	@make DISTR="debian" linux.tar
-
-.PHONY:
-debian.img:
-	@make DISTR="debian" linux.img
-
-.PHONY:
-ubuntu.tar:
-	@make DISTR="ubuntu" linux.tar
-
-.PHONY:
-ubuntu.img:
-	@make DISTR="ubuntu" linux.img
-
-.PHONY:
-alpine.tar:
-	@make DISTR="alpine" linux.tar
-
-.PHONY:
-alpine.img:
-	@make DISTR="alpine" linux.img
+docker.img:
+	@make DISTR="docker" linux.img
 
 linux.tar:
 	@echo ${COL_GRN}"[Dump ${DISTR} directory structure to tar archive]"${COL_END}
-	docker build -f ${DISTR}/Dockerfile -t ${REPO}/${DISTR} .
-	docker export -o linux.tar `docker run -d ${REPO}/${DISTR} /bin/true`
+	docker build -f ${DISTR}/Dockerfile -t ${REPO}/${DISTR} . && \
+	CONTAINER_ID="$$(docker run -d ${REPO}/${DISTR} /bin/true)" && \
+	docker export -o linux.tar "$${CONTAINER_ID}" && \
+	docker container rm "$${CONTAINER_ID}"
 
 linux.dir: linux.tar
 	@echo ${COL_GRN}"[Extract ${DISTR} tar archive]"${COL_END}
@@ -49,7 +29,7 @@ linux.dir: linux.tar
 
 linux.img: builder linux.dir
 	@echo ${COL_GRN}"[Create ${DISTR} disk image]"${COL_END}
-	docker run -it \
+	docker run --rm -it \
 		-v `pwd`:/os:rw \
 		-e DISTR=${DISTR} \
 		--privileged \
@@ -65,7 +45,7 @@ builder:
 
 .PHONY:
 builder-interactive:
-	docker run -it \
+	docker run --rm -it \
 		-v `pwd`:/os:rw \
 		--cap-add SYS_ADMIN \
 		${REPO}/builder bash
@@ -92,4 +72,3 @@ clean-docker-images:
 	else\
 		echo "<noop>";\
 	fi
-

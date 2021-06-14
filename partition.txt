@@ -4,4 +4,3 @@ device: new.img
 unit: sectors
 
 linux.img1 : start=2048, size=2095104, type=83, bootable
-

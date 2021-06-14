@@ -1,3 +1,7 @@
 *.swp
 .DS_store
-
+mnt
+linux.tar
+linux.dir
+linux.img
+linux.vdi
